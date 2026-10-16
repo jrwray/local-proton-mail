@@ -106,3 +106,7 @@ the people, dates and amounts it mentions, in `archive/ai/<thread>.json` and
 - [x] Attachments on demand
 - [x] Drafts written by agents (never sent)
 - [ ] Claude API as an optional summary engine
+
+## License
+
+MIT
