@@ -54,9 +54,44 @@ pmail summarize [--limit N]          # summarize pending conversations now
 pmail range today|all|YYYY-MM-DD     # which emails to keep
 pmail fetch-attachment <id> "<name>"
 pmail draft --reply <id> --body "..."   # saved to Proton Drafts, never sent
+pmail mcp                            # MCP server for Claude and other agents (below)
 ```
 
 Agents: see `archive/AGENTS.md` for the layout and the safety rules.
+
+### Use with Claude (MCP)
+
+`pmail mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server, so Claude Desktop,
+Claude Code and other MCP clients can use the archive directly. It has five tools:
+
+| Tool | What it does |
+| --- | --- |
+| `search_emails` | Search by words, sender, dates or folder; newsletters left out unless asked |
+| `read_email` | One email's header and text |
+| `list_threads` | Conversations with their AI title, summary and action items |
+| `read_thread` | A whole conversation in order, summary first |
+| `create_draft` | Save a draft in Proton Drafts for you to send. There is no send tool. |
+
+Every result that contains email text starts with a reminder that the text is untrusted. The
+server reads the local archive and talks to Bridge only for drafts. It has no dependencies
+beyond this repo (`pmail/mcp_server.py`, about 250 lines).
+
+Claude Code:
+
+```
+claude mcp add proton-mail -- /path/to/local-proton-mail/pmail.sh mcp      # macOS
+claude mcp add proton-mail -- C:\path\to\local-proton-mail\pmail.cmd mcp   # Windows
+```
+
+Claude Desktop (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "proton-mail": { "command": "/path/to/local-proton-mail/pmail.sh", "args": ["mcp"] }
+  }
+}
+```
 
 ## How emails are stripped, and why
 
@@ -105,4 +140,5 @@ the people, dates and amounts it mentions, in `archive/ai/<thread>.json` and
 - [x] Live sync while running
 - [x] Attachments on demand
 - [x] Drafts written by agents (never sent)
+- [x] MCP server for Claude and other agents
 - [ ] Claude API as an optional summary engine

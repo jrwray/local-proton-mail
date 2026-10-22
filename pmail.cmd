@@ -1,4 +1,5 @@
 @echo off
+rem Setup messages go to stderr so stdout stays clean for `pmail mcp`.
 rem pmail for Windows: sets itself up on first use, then runs a command.
 rem   pmail start | stop | status | sync | serve | draft ...   (see README)
 rem Uses uv when it's installed, otherwise plain Python 3.11+.
@@ -17,7 +18,7 @@ if not errorlevel 1 (
   fc /b pyproject.toml .venv\pyproject.stamp >nul 2>nul
   if not errorlevel 1 exit /b 0
 )
-echo Setting up local-proton-mail (first run or after an update)...
+echo Setting up local-proton-mail (first run or after an update)... 1>&2
 call :find_uv
 if defined UV (
   "%UV%" sync --quiet --no-dev
@@ -26,7 +27,7 @@ if defined UV (
 )
 call :find_python
 if not defined BASEPY (
-  echo Python 3.11 or newer is needed. Install it from https://www.python.org/downloads/ and try again.
+  echo Python 3.11 or newer is needed. Install it from https://www.python.org/downloads/ and try again. 1>&2
   exit /b 1
 )
 if exist .venv rmdir /s /q .venv
