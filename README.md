@@ -6,6 +6,15 @@ Keeps a local, AI-agent-readable copy of a Proton Mail account, synced through
 The mail itself is saved in `archive/`, which is gitignored: this repo only ever
 holds the tool. Each device builds its own copy from Bridge.
 
+[![CI](https://github.com/jrwray/local-proton-mail/actions/workflows/ci.yml/badge.svg)](https://github.com/jrwray/local-proton-mail/actions/workflows/ci.yml)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot-light.png" alt="The local page: mail count and live sync status, AI summary progress, settings, and where agents should look" width="720">
+</picture>
+
+<sub>The local page at http://127.0.0.1:7861, shown with sample numbers.</sub>
+
 ## Why local
 
 Your inbox doesn't need to be handed to another company for AI to be useful with it.
