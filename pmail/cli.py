@@ -7,6 +7,7 @@ from pmail import ai, bridge, config, settings, sync
 
 
 def cmd_setup(args: argparse.Namespace) -> int:
+    config.check_keychain()
     print("Find these in Proton Mail Bridge: click your account, then 'Mailbox details' (IMAP).")
     username = input("Bridge IMAP username: ").strip()
     password = getpass.getpass("Bridge IMAP password (not your Proton password): ")

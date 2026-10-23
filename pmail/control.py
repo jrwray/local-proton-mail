@@ -77,7 +77,7 @@ def stop(wait: float = 15) -> str:
 
 def describe(s: dict | None) -> str:
     if s is None:
-        return "Not running. Start it with: pmail start (pmail.cmd start on Windows, ./pmail.sh start on macOS)"
+        return "Not running. Start it with: pmail start (pmail.cmd start on Windows, ./pmail.sh start on macOS or Linux)"
     svc, c = s["service"], s["counts"]
     mail = {"watching": "live, watching for new mail", "syncing": "syncing", "starting": "starting",
             "error": f"paused: {svc['mail_error']}"}.get(svc["mail"], svc["mail"])
