@@ -1,10 +1,19 @@
 # local-proton-mail
 
 Keeps a local, AI-agent-readable copy of a Proton Mail account, synced through
-[Proton Mail Bridge](https://proton.me/mail/bridge). Works on Windows and macOS.
+[Proton Mail Bridge](https://proton.me/mail/bridge). Works on Windows, macOS and Linux.
 
 The mail itself is saved in `archive/`, which is gitignored: this repo only ever
 holds the tool. Each device builds its own copy from Bridge.
+
+[![CI](https://github.com/jrwray/local-proton-mail/actions/workflows/ci.yml/badge.svg)](https://github.com/jrwray/local-proton-mail/actions/workflows/ci.yml)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot-light.png" alt="The local page: mail count and live sync status, AI summary progress, settings, and where agents should look" width="720">
+</picture>
+
+<sub>The local page at http://127.0.0.1:7861, shown with sample numbers.</sub>
 
 ## Why local
 
@@ -26,12 +35,14 @@ Note: when you ask a cloud AI about an email, the text you give it is sent to
 that provider, just like pasting it into a chat. The difference is that you
 decide what goes, per question.
 
-## Set up a device (Windows or macOS)
+## Set up a device (Windows, macOS or Linux)
 
 1. Install [Proton Mail Bridge](https://proton.me/mail/bridge) and sign in.
 2. Have Python 3.11+ installed. For free local summaries, install [Ollama](https://ollama.com/download)
    and a model: `ollama pull qwen2.5:7b`.
-3. Clone this repo and double-click **`Start.bat`** (Windows) or **`Start.command`** (macOS).
+   On Linux the Bridge password is kept in the Secret Service keychain (GNOME Keyring or KeePassXC),
+   so one must be running and unlocked. On Debian/Ubuntu without uv, also install `python3-venv`.
+3. Clone this repo and double-click **`Start.bat`** (Windows) or **`Start.command`** (macOS), or run **`./Start.sh`** (Linux).
    The first run sets everything up by itself (using [uv](https://docs.astral.sh/uv/) if you have it).
 4. The page opens at http://127.0.0.1:7861. Paste the IMAP username and password from
    Bridge (Mailbox details), pick a date range, and leave it running while you work.
@@ -42,7 +53,7 @@ one by one in the background (newsletters, receipts, notifications and other aut
 
 ### Commands (for terminals and AI agents)
 
-Run from the repo folder: `pmail.cmd <command>` on Windows, `./pmail.sh <command>` on macOS.
+Run from the repo folder: `pmail.cmd <command>` on Windows, `./pmail.sh <command>` on macOS or Linux.
 Each sets itself up on first use.
 
 ```
@@ -128,7 +139,7 @@ the people, dates and amounts it mentions, in `archive/ai/<thread>.json` and
 - The Bridge password lives in the OS keychain, never in a file.
 - No code that can send email exists in this repo; CI fails if any appears, or if
   mail, settings, real addresses or keys are ever committed.
-- Your local copy is plain text: use full-disk encryption (BitLocker / FileVault) and
+- Your local copy is plain text: use full-disk encryption (BitLocker / FileVault / LUKS) and
   keep it out of cloud-synced folders (the tool warns if it isn't).
 
 ## Status
@@ -136,9 +147,13 @@ the people, dates and amounts it mentions, in `archive/ai/<thread>.json` and
 - [x] Bridge connection, download, stripping, date range
 - [x] Agent safety rules and repo guards
 - [x] Local AI summaries (Ollama)
-- [x] Local page with Start.bat / Start.command
+- [x] Local page with Start.bat / Start.command / Start.sh
 - [x] Live sync while running
 - [x] Attachments on demand
 - [x] Drafts written by agents (never sent)
 - [x] MCP server for Claude and other agents
 - [ ] Claude API as an optional summary engine
+
+## License
+
+MIT

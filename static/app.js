@@ -66,7 +66,7 @@ async function refresh() {
   try {
     render(await (await fetch("/api/status")).json());
   } catch {
-    $("mail-state").textContent = "The tool isn't running. Start it with Start.bat (Windows) or Start.command (Mac).";
+    $("mail-state").textContent = "The tool isn't running. Start it with Start.bat (Windows), Start.command (Mac) or Start.sh (Linux).";
     setDot($("mail-dot"), "err");
   }
 }

@@ -13,7 +13,7 @@ _depth = threading.local()
 
 @contextlib.contextmanager
 def archive_lock(timeout: float = 600):
-    """Hold the archive for writing, across threads and processes (Windows and macOS).
+    """Hold the archive for writing, across threads and processes (Windows, macOS and Linux).
 
     Re-entrant within a thread: only the outermost call takes the file lock.
     """
