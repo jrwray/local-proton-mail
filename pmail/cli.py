@@ -115,6 +115,12 @@ def cmd_draft(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_mcp(args: argparse.Namespace) -> int:
+    from pmail import mcp_server
+    mcp_server.serve()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pmail", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -149,5 +155,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--body", help="draft text (or use --body-file, or pipe it in)")
     p.add_argument("--body-file")
     p.set_defaults(func=cmd_draft)
+    sub.add_parser("mcp", help="MCP server on stdin/stdout for Claude and other agents (read + drafts, never sends)"
+                   ).set_defaults(func=cmd_mcp)
     args = parser.parse_args(argv)
     return args.func(args)

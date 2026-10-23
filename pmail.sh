@@ -2,6 +2,7 @@
 # pmail for macOS/Linux: sets itself up on first use, then runs a command.
 #   ./pmail.sh start | stop | status | sync | serve | draft ...   (see README)
 # Uses uv when it's installed, otherwise plain Python 3.11+.
+# Setup messages go to stderr so stdout stays clean for `pmail mcp`.
 set -e
 cd "$(dirname "$0")"
 PY=.venv/bin/python
@@ -11,7 +12,7 @@ ready() {
 }
 
 if ! ready; then
-  echo "Setting up local-proton-mail (first run or after an update)..."
+  echo "Setting up local-proton-mail (first run or after an update)..." >&2
   UV=$(command -v uv || true)
   for candidate in "$HOME/.local/bin/uv" "$HOME/.cargo/bin/uv" /opt/homebrew/bin/uv /usr/local/bin/uv; do
     if [ -z "$UV" ] && [ -x "$candidate" ]; then UV="$candidate"; fi
@@ -26,7 +27,7 @@ if ! ready; then
       fi
     done
     if [ -z "$BASEPY" ]; then
-      echo "Python 3.11 or newer is needed. Install it from https://www.python.org/downloads/ and try again."
+      echo "Python 3.11 or newer is needed. Install it from https://www.python.org/downloads/ and try again." >&2
       exit 1
     fi
     rm -rf .venv

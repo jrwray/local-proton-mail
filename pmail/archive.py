@@ -53,6 +53,7 @@ appears here within seconds.
     pmail.cmd fetch-attachment <id> "<name>"   # into attachments/<id>/; never run it
     pmail.cmd draft --reply <id> --body "..."  # saved to Proton Drafts for the owner
                                                # to review; nothing can send
+    pmail.cmd mcp                              # the same reads and drafts as MCP tools
 
 ## Layout
 
