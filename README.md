@@ -90,7 +90,7 @@ beyond this repo (`pmail/mcp_server.py`, about 250 lines).
 Claude Code:
 
 ```
-claude mcp add proton-mail -- /path/to/local-proton-mail/pmail.sh mcp      # macOS
+claude mcp add proton-mail -- /path/to/local-proton-mail/pmail.sh mcp      # macOS or Linux
 claude mcp add proton-mail -- C:\path\to\local-proton-mail\pmail.cmd mcp   # Windows
 ```
 

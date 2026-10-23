@@ -259,6 +259,11 @@ def serve(stdin=None, stdout=None) -> None:
         except ValueError:
             reply = {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "Parse error"}}
         else:
+            if not isinstance(request, dict):
+                reply = {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "Invalid request"}}
+                stdout.write(json.dumps(reply) + "\n")
+                stdout.flush()
+                continue
             try:
                 reply = handle(request)
             except Exception as exc:  # never let one bad call kill the server

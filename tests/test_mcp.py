@@ -120,3 +120,12 @@ def test_serve_speaks_one_json_message_per_line():
     assert [r.get("id") for r in replies] == [1, None, 2]
     assert replies[1]["error"]["code"] == -32700
     assert replies[2]["error"]["code"] == -32601
+
+
+def test_serve_survives_a_message_that_is_not_an_object():
+    lines = ["[1, 2]", json.dumps({"jsonrpc": "2.0", "id": 3, "method": "ping"})]
+    out = io.StringIO()
+    mcp_server.serve(io.StringIO("\n".join(lines) + "\n"), out)
+    replies = [json.loads(line) for line in out.getvalue().splitlines()]
+    assert replies[0]["error"]["code"] == -32600
+    assert replies[1] == {"jsonrpc": "2.0", "id": 3, "result": {}}
