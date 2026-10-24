@@ -76,7 +76,11 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 def cmd_serve(args: argparse.Namespace) -> int:
+    import sys
     from pmail import server
+    if args.log:  # started in the background: no console, so write output to a file
+        stream = open(args.log, "a", encoding="utf-8", buffering=1)
+        sys.stdout = sys.stderr = stream
     server.serve(port=args.port, open_browser=not args.no_browser)
     return 0
 
@@ -139,6 +143,7 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("serve", help="open the local page and keep mail and summaries in sync while it runs")
     p.add_argument("--port", type=int, default=7861)
     p.add_argument("--no-browser", action="store_true")
+    p.add_argument("--log", help=argparse.SUPPRESS)
     p.set_defaults(func=cmd_serve)
     p = sub.add_parser("watch", help="live sync in this terminal, without the page")
     p.add_argument("--no-summaries", action="store_true")

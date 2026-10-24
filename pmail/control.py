@@ -12,6 +12,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 from pmail import config
 from pmail.server import PORT
@@ -38,22 +39,54 @@ def start(wait: float = 20) -> str:
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
     log = open(config.DATA_DIR / "app.log", "ab")
     kwargs = {"cwd": config.REPO_ROOT, "stdout": log, "stderr": subprocess.STDOUT, "stdin": subprocess.DEVNULL}
+    log_path = config.DATA_DIR / "app.log"
     if os.name == "nt":
-        kwargs["creationflags"] = (subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-                                   | subprocess.CREATE_NO_WINDOW)
+        pid = _start_windows(log_path)
+        proc = None
     else:
-        kwargs["start_new_session"] = True
-    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1"}
-    proc = subprocess.Popen([sys.executable, "-m", "pmail", "serve", "--no-browser"], env=env, **kwargs)
-    _pid_file().write_text(str(proc.pid))
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1"}
+        proc = subprocess.Popen([sys.executable, "-m", "pmail", "serve", "--no-browser"], env=env,
+                                start_new_session=True, **kwargs)
+        pid = proc.pid
+    _pid_file().write_text(str(pid))
     deadline = time.monotonic() + wait
     while time.monotonic() < deadline:
         if status() is not None:
             return f"Started at {URL}. Mail syncs live while it runs; stop it with: pmail stop"
-        if proc.poll() is not None:
-            raise SystemExit(f"It stopped straight away. See {config.DATA_DIR / 'app.log'}")
+        if proc is not None and proc.poll() is not None:
+            raise SystemExit(f"It stopped straight away. See {log_path}")
         time.sleep(0.5)
-    return f"Starting (pid {proc.pid}); check with: pmail status"
+    return f"Starting (pid {pid}); if `pmail status` stays 'Not running', see {log_path}"
+
+
+def _start_windows(log_path) -> int:
+    """Start through WMI so the app isn't tied to the terminal or agent that launched it.
+
+    Closing a terminal tab (or an agent's shell ending) kills everything in its job
+    object, including detached children; a WMI-created process lives outside it.
+    pythonw keeps it windowless; it writes its own log.
+    """
+    pythonw = Path(sys.executable).with_name("pythonw.exe")
+    exe = pythonw if pythonw.exists() else Path(sys.executable)
+    command = f'"{exe}" -m pmail serve --no-browser --log "{log_path}"'
+    script = ("$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments "
+              f"@{{CommandLine={_ps_quote(command)}; CurrentDirectory={_ps_quote(str(config.REPO_ROOT))}}}; "
+              "if ($r.ReturnValue -ne 0) { exit 1 }; $r.ProcessId")
+    try:
+        out = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
+                             capture_output=True, text=True, timeout=60, check=True).stdout
+        return int(out.strip().splitlines()[-1])
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+        # No PowerShell/WMI: fall back to a detached child (stops if its terminal is closed).
+        flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+        proc = subprocess.Popen([str(exe), "-m", "pmail", "serve", "--no-browser", "--log", str(log_path)],
+                                cwd=config.REPO_ROOT, creationflags=flags, stdin=subprocess.DEVNULL,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return proc.pid
+
+
+def _ps_quote(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
 
 
 def stop(wait: float = 15) -> str:
