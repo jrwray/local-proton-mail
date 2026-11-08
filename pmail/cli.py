@@ -119,6 +119,22 @@ def cmd_draft(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_sent(args: argparse.Namespace) -> int:
+    import datetime as dt
+    from pmail import sent
+    since = dt.date.fromisoformat(args.since) if args.since else None
+    rows = sent.find(to=args.to, subject=args.subject, since=since)
+    if args.sent_only:
+        rows = [r for r in rows if r["status"] == "sent"]
+    for r in rows:
+        where = "in Sent" if r["in_sent_folder"] else "not in Sent (archived or moved)"
+        thread = "threaded" if r["threaded"] else "new thread"
+        print(f"{r['status'].upper():5} | {r['when']:%Y-%m-%d %H:%M} | {r['to']} | {r['subject']} | {thread} | {where}")
+    if not rows:
+        print("Nothing from you matches.")
+    return 0
+
+
 def cmd_mcp(args: argparse.Namespace) -> int:
     from pmail import mcp_server
     mcp_server.serve()
@@ -160,6 +176,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--body", help="draft text (or use --body-file, or pipe it in)")
     p.add_argument("--body-file")
     p.set_defaults(func=cmd_draft)
+    p = sub.add_parser("sent", help="was it sent? your mail from All Mail, marked SENT or DRAFT (read-only)")
+    p.add_argument("--to", help="recipient address (or part of it)")
+    p.add_argument("--subject", help="words in the subject")
+    p.add_argument("--since", help="YYYY-MM-DD")
+    p.add_argument("--sent-only", action="store_true", help="hide drafts")
+    p.set_defaults(func=cmd_sent)
     sub.add_parser("mcp", help="MCP server on stdin/stdout for Claude and other agents (read + drafts, never sends)"
                    ).set_defaults(func=cmd_mcp)
     args = parser.parse_args(argv)

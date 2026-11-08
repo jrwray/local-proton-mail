@@ -65,8 +65,13 @@ pmail summarize [--limit N]          # summarize pending conversations now
 pmail range today|all|YYYY-MM-DD     # which emails to keep
 pmail fetch-attachment <id> "<name>"
 pmail draft --reply <id> --body "..."   # saved to Proton Drafts, never sent
+pmail sent [--to addr] [--subject w] [--since YYYY-MM-DD] [--sent-only]   # was it sent? (read-only)
 pmail mcp                            # MCP server for Claude and other agents (below)
 ```
+
+To check whether something went out, use `pmail sent`, not the Sent folder. Archiving a conversation in
+Proton moves your sent message out of Sent and an unsent draft out of Drafts (both into Archive).
+`pmail sent` looks in All Mail and marks each of your messages SENT or DRAFT by its `\Draft` flag.
 
 Agents: see `archive/AGENTS.md` for the layout and the safety rules.
 
